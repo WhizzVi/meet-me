@@ -14,14 +14,37 @@ export type Attempt = {
 
 const ATTEMPTS_KEY = "attempts";
 
-function redisConfigured(): boolean {
-  return Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+const REST_URL_SUFFIX = "KV_REST_API_URL";
+const REST_TOKEN_SUFFIX = "KV_REST_API_TOKEN";
+
+function redisCreds(): { url: string; token: string } | null {
+  const directUrl = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
+  const directToken = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
+  if (directUrl && directToken) return { url: directUrl, token: directToken };
+
+  const urlKey = Object.keys(process.env).find(
+    (key) => key.endsWith(REST_URL_SUFFIX) && !key.endsWith(`READ_ONLY_${REST_TOKEN_SUFFIX}`) && process.env[key],
+  );
+  if (!urlKey) return null;
+
+  const prefix = urlKey.slice(0, urlKey.length - REST_URL_SUFFIX.length);
+  const url = process.env[urlKey];
+  const token = process.env[`${prefix}${REST_TOKEN_SUFFIX}`];
+  return url && token ? { url, token } : null;
+}
+
+export function redisConfigured(): boolean {
+  return redisCreds() !== null;
 }
 
 let redisClient: Redis | null = null;
 
 function getRedis(): Redis {
-  if (!redisClient) redisClient = Redis.fromEnv();
+  if (!redisClient) {
+    const creds = redisCreds();
+    if (!creds) throw new Error("redis not configured");
+    redisClient = new Redis({ url: creds.url, token: creds.token });
+  }
   return redisClient;
 }
 
@@ -132,4 +155,16 @@ export async function getAttempt(id: string): Promise<Attempt | null> {
 export async function getAllAttempts(): Promise<Attempt[]> {
   if (redisConfigured()) return redisGetAll();
   return fileReadAll();
+}
+
+export async function storageHealth(): Promise<{ backend: string; redisCheck: string }> {
+  if (!redisConfigured()) return { backend: "file", redisCheck: "skipped" };
+  try {
+    const redis = getRedis();
+    await redis.set("health:ping", "ok");
+    const value = await redis.get("health:ping");
+    return { backend: "redis", redisCheck: value === "ok" ? "ok" : `unexpected:${JSON.stringify(value)}` };
+  } catch (error) {
+    return { backend: "redis", redisCheck: `error:${(error as Error).message}`.slice(0, 300) };
+  }
 }

@@ -23,7 +23,7 @@ vi.mock("@upstash/redis", () => ({
   },
 }));
 
-import { createAttempt, setDish, getAttempt, getAllAttempts } from "@/lib/storage";
+import { createAttempt, setDish, getAttempt, getAllAttempts, redisConfigured } from "@/lib/storage";
 
 beforeEach(() => {
   store.clear();
@@ -57,5 +57,21 @@ describe("storage (redis backend)", () => {
 
   it("returns null for unknown id", async () => {
     expect(await getAttempt("nope")).toBeNull();
+  });
+
+  it("detects prefixed Vercel/Upstash env vars (e.g. DATE_INVITE_REDDIS_*)", async () => {
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    process.env.DATE_INVITE_REDDIS_KV_REST_API_URL = "https://relative-camel.upstash.io";
+    process.env.DATE_INVITE_REDDIS_KV_REST_API_TOKEN = "prefixed-token";
+    process.env.DATE_INVITE_REDDIS_KV_REST_API_READ_ONLY_TOKEN = "ro-token";
+
+    expect(redisConfigured()).toBe(true);
+    const created = await createAttempt({ date: "2026-07-04", time: "18:00" });
+    expect((await getAttempt(created.id))?.id).toBe(created.id);
+
+    delete process.env.DATE_INVITE_REDDIS_KV_REST_API_URL;
+    delete process.env.DATE_INVITE_REDDIS_KV_REST_API_TOKEN;
+    delete process.env.DATE_INVITE_REDDIS_KV_REST_API_READ_ONLY_TOKEN;
   });
 });

@@ -8,6 +8,9 @@ const DATA_FILE = path.join(process.cwd(), "data", "submissions.test.json");
 beforeEach(async () => {
   delete process.env.UPSTASH_REDIS_REST_URL;
   delete process.env.UPSTASH_REDIS_REST_TOKEN;
+  for (const key of Object.keys(process.env)) {
+    if (key.endsWith("KV_REST_API_URL") || key.endsWith("KV_REST_API_TOKEN")) delete process.env[key];
+  }
   await fs.rm(DATA_FILE, { force: true });
   process.env.SUBMISSIONS_FILE = DATA_FILE;
 });

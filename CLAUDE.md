@@ -3,7 +3,7 @@
 Next.js 15.3 App Router app (TypeScript). A playful, pastel-cat-themed romantic date-invitation flow.
 
 ## Map
-- Storage: `lib/storage.ts` — backend adapter. Uses **Upstash Redis** when `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` are set (Vercel/prod), otherwise falls back to a local JSON file `data/submissions.json` (dev + tests). Same async interface (`createAttempt`/`setDish`/`getAttempt`/`getAllAttempts`). Redis stores each attempt in the `attempts` hash keyed by id. Each pass creates a NEW attempt (never overwrites).
+- Storage: `lib/storage.ts` — backend adapter. Uses **Upstash Redis** when REST creds are present, otherwise falls back to a local JSON file `data/submissions.json` (dev + tests). `redisCreds()` resolves creds from `UPSTASH_REDIS_REST_URL/TOKEN`, plain `KV_REST_API_URL/TOKEN`, OR any **prefixed** pair (Vercel's Upstash integration injects e.g. `DATE_INVITE_REDDIS_KV_REST_API_URL/TOKEN`) — it scans env keys ending in `KV_REST_API_URL` and pairs the matching token. Same async interface (`createAttempt`/`setDish`/`getAttempt`/`getAllAttempts`). Redis stores each attempt in the `attempts` hash keyed by id. `GET /api/health` reports the active backend + a live redis ping for debugging.
 - Dishes: `lib/dishes.ts` — single source of truth for the dish list (`DISHES`, `dishLabel`).
 - Sessions: `lib/session.ts` — `sid` cookie correlates one attempt across `/when` → `/what` → `/final`; `show_auth` gates `/show`. `cookies()` is async in Next 15 — always `await`.
 - Runaway button: `components/NoButton.tsx` — slides via CSS transition on `left`/`top` (not a teleport); flees on `mouseenter` (desktop) and `pointerdown` (touch), switching the emoji to 😏.
