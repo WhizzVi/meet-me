@@ -7,7 +7,7 @@ Next.js 15.3 App Router app (TypeScript). A playful, pastel-cat-themed romantic 
 - Dishes: `lib/dishes.ts` — single source of truth for the dish list (`DISHES`, `dishLabel`).
 - Sessions: `lib/session.ts` — `sid` cookie correlates one attempt across `/when` → `/what` → `/final`; `show_auth` gates `/show`. `cookies()` is async in Next 15 — always `await`.
 - Runaway button: `components/NoButton.tsx` — slides via CSS transition on `left`/`top` (not a teleport); flees on `mouseenter` (desktop) and `pointerdown` (touch), switching the emoji to 😏.
-- API: `app/api/submit` (create on `{date,time}` / update on `{dish}`), `app/api/submission` (read current by sid), `app/api/show-login` (password → `show_auth`).
+- API: `app/api/submit` (create on `{date,time}` / update on `{dish}`), `app/api/show-login` (password → `show_auth`). `/final` reads its attempt server-side via `getAttempt(sid)` — no read API needed.
 - Theme: `app/globals.css` — pastel palette + shared classes + hearts animation. `components/HeartsBackground.tsx` renders the floating glyphs. `components/cats.tsx` is the cat emoji.
 
 ## Commands

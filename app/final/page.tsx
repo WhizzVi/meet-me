@@ -5,6 +5,7 @@ import { dishLabel } from "@/lib/dishes";
 
 function formatDate(date: string): string {
   const parsed = new Date(`${date}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return date;
   return parsed.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
 }
 
