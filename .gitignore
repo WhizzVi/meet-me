@@ -3,3 +3,7 @@ node_modules/
 .env.local
 .superpowers/
 data/submissions.json
+data/submissions.test.json
+.localstorage
+.localstorage*
+*.tsbuildinfo
