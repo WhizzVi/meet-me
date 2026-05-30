@@ -8,19 +8,22 @@ export default function WhenForm() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (!date || !time) return;
     setBusy(true);
+    setFailed(false);
     const response = await fetch("/api/submit", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ date, time }),
-    });
-    if (response.ok) {
+    }).catch(() => null);
+    if (response?.ok) {
       router.push("/what");
     } else {
+      setFailed(true);
       setBusy(false);
     }
   }
@@ -38,6 +41,9 @@ export default function WhenForm() {
       <button type="submit" className="btn" disabled={busy} style={{ width: "100%" }}>
         Дальше 💌
       </button>
+      {failed && (
+        <p style={{ color: "var(--pink-700)", marginTop: 12 }}>Упс, что-то пошло не так 🙀 Попробуй ещё раз.</p>
+      )}
     </form>
   );
 }

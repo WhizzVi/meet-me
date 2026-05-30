@@ -3,7 +3,7 @@
 Next.js 15.3 App Router app (TypeScript). A playful, pastel-cat-themed romantic date-invitation flow.
 
 ## Map
-- Storage: `lib/storage.ts` — the ONLY place that touches `data/submissions.json`. Each pass through the app creates a NEW attempt (never overwrites), so all attempts stay visible.
+- Storage: `lib/storage.ts` — backend adapter. Uses **Upstash Redis** when `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` are set (Vercel/prod), otherwise falls back to a local JSON file `data/submissions.json` (dev + tests). Same async interface (`createAttempt`/`setDish`/`getAttempt`/`getAllAttempts`). Redis stores each attempt in the `attempts` hash keyed by id. Each pass creates a NEW attempt (never overwrites).
 - Dishes: `lib/dishes.ts` — single source of truth for the dish list (`DISHES`, `dishLabel`).
 - Sessions: `lib/session.ts` — `sid` cookie correlates one attempt across `/when` → `/what` → `/final`; `show_auth` gates `/show`. `cookies()` is async in Next 15 — always `await`.
 - Runaway button: `components/NoButton.tsx` — slides via CSS transition on `left`/`top` (not a teleport); flees on `mouseenter` (desktop) and `pointerdown` (touch), switching the emoji to 😏.
@@ -18,5 +18,6 @@ Next.js 15.3 App Router app (TypeScript). A playful, pastel-cat-themed romantic 
 ## Gotchas
 - **Node 25 + Next dev:** Node 25 ships a `localStorage` global whose methods throw without `--localstorage-file`, crashing Next SSR. The `dev` and `start` scripts set `NODE_OPTIONS=--localstorage-file=.localstorage` to fix this. Do NOT run `next dev` directly — use `npm run dev`.
 - `SHOW_PASSWORD` lives in `.env.local` (gitignored). Without it, `/show` login always fails.
-- `data/submissions.json` is gitignored and created on first submit. Delete it to reset all attempts.
-- Tests point storage at `data/submissions.test.json` via the `SUBMISSIONS_FILE` env var; Vitest resolves the `@/` alias via `resolve.alias` in `vitest.config.ts`.
+- `data/submissions.json` is gitignored and created on first submit (local/dev only). Delete it to reset local attempts.
+- **Vercel filesystem is read-only** — the JSON-file backend CANNOT work there (writes throw `EACCES`/`EROFS` → API 500 → page won't advance). Production MUST use Redis. Provision an Upstash store via Vercel Marketplace (Storage → it auto-injects `UPSTASH_REDIS_REST_URL`/`_TOKEN`), then `vercel env pull .env.local` for local Redis testing.
+- Tests: file-backend tests force the file path (clear UPSTASH env); the Redis-backend test (`tests/storage-redis.test.ts`) mocks `@upstash/redis`. Vitest resolves `@/` via `resolve.alias` in `vitest.config.ts`.

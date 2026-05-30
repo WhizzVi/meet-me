@@ -7,3 +7,4 @@ data/submissions.test.json
 .localstorage
 .localstorage*
 *.tsbuildinfo
+.idea/

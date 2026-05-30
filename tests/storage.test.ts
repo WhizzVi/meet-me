@@ -6,6 +6,8 @@ import { createAttempt, setDish, getAttempt, getAllAttempts } from "@/lib/storag
 const DATA_FILE = path.join(process.cwd(), "data", "submissions.test.json");
 
 beforeEach(async () => {
+  delete process.env.UPSTASH_REDIS_REST_URL;
+  delete process.env.UPSTASH_REDIS_REST_TOKEN;
   await fs.rm(DATA_FILE, { force: true });
   process.env.SUBMISSIONS_FILE = DATA_FILE;
 });
