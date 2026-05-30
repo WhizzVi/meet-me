@@ -1,11 +1,11 @@
 {
-  "name": "di-scaffold",
+  "name": "date-invite",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_OPTIONS=--localstorage-file=.localstorage next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "NODE_OPTIONS=--localstorage-file=.localstorage next start",
     "lint": "eslint",
     "test": "vitest run"
   },

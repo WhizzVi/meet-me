@@ -4,3 +4,4 @@ node_modules/
 .superpowers/
 data/submissions.json
 data/submissions.test.json
+.localstorage
