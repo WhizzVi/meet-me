@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Date Invite 💕🐱
 
-## Getting Started
+Игривое романтичное приглашение на свидание в пастельно-кошачьем стиле. Девушка отвечает на вопрос, выбирает дату/время и блюдо — всё сохраняется, а пригласивший смотрит результат на защищённой паролем странице.
 
-First, run the development server:
+## Что внутри
+- `/` — вопрос «Ты пойдёшь со мной на свидание?» с кнопками «Да» 💖 и «Нет» 😢 (кнопка «Нет» убегает от курсора/пальца).
+- `/when` — выбор даты и времени.
+- `/what` — выбор блюда (рамен, морепродукты, паста, стейк, суши, борщ, десертики).
+- `/final` — итоговое сообщение со счастливым котиком.
+- `/show` — все попытки (нужен пароль `SHOW_PASSWORD`).
+
+Ответы сохраняются в `data/submissions.json`. Каждый проход = отдельная попытка.
+
+## Запуск
 
 ```bash
+npm install
+echo 'SHOW_PASSWORD=меняй-меня' > .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Открой http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Сборка
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Тесты
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm test
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Стек
+Next.js 15.3 (App Router), React 19, TypeScript, чистый CSS, Vitest. Хранение — JSON-файл.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Примечание
+Скрипты `dev`/`start` выставляют `NODE_OPTIONS=--localstorage-file=.localstorage` для совместимости с Node 25 (иначе Next падает на SSR). Запускай через `npm run dev`, а не `next dev` напрямую.
