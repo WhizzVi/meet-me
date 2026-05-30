@@ -5,3 +5,5 @@ node_modules/
 data/submissions.json
 data/submissions.test.json
 .localstorage
+.localstorage*
+*.tsbuildinfo
